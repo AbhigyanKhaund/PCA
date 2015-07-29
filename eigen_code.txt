@@ -1,0 +1,35 @@
+#function for calculating eigenvalues and eigenvectors
+
+function (x, symmetric, only.values = FALSE, EISPACK = FALSE) 
+{
+    x <- as.matrix(x)
+    n <- nrow(x)
+    if (!n) 
+        stop("0 x 0 matrix")
+    if (n != ncol(x)) 
+        stop("non-square matrix in 'eigen'")
+    n <- as.integer(n)
+    if (is.na(n)) 
+        stop("invalid nrow(x)")
+    complex.x <- is.complex(x)
+    if (!all(is.finite(x))) 
+        stop("infinite or missing values in 'x'")
+    if (missing(symmetric)) 
+        symmetric <- isSymmetric.matrix(x)
+    if (symmetric) {
+        z <- if (!complex.x) 
+            .Internal(La_rs(x, only.values))
+        else .Internal(La_rs_cmplx(x, only.values))
+        ord <- rev(seq_along(z$values))
+    }
+    else {
+        z <- if (!complex.x) 
+            .Internal(La_rg(x, only.values))
+        else .Internal(La_rg_cmplx(x, only.values))
+        ord <- sort.list(Mod(z$values), decreasing = TRUE)
+    }
+    return(list(values = z$values[ord], vectors = if (!only.values) z$vectors[, 
+        ord, drop = FALSE]))
+}
+<bytecode: 0x000000000a0ec9f0>
+<environment: namespace:base>
